@@ -47,6 +47,9 @@ export class AppComponent implements OnInit {
     // alert("Clicked: " + item.Key);
     event.preventDefault();
   }
+  get productForm$() {
+    return this.adwService.form$;
+  }
   get currentProduct() {
     return this.adwService.currentItem;
   }

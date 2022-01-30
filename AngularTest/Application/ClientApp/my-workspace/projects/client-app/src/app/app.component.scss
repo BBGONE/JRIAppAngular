@@ -75,8 +75,14 @@ footer a {
 
 .input-control{
     margin: 3px 6px;
+    min-width: 15em;
 }
 
 .button{
     margin: 3px 6px;
+}
+
+form > label {
+    display: inline-block;
+    min-width: 10em;
 }
