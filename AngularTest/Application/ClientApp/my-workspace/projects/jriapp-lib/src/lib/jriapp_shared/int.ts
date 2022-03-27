@@ -1,4 +1,4 @@
-﻿/** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
+/** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
 import { DEBUG_LEVEL } from "./consts";
 import { IVoidPromise } from "./utils/ipromise";
 
@@ -31,6 +31,11 @@ export interface IDisposable {
 
 export interface IIndexer<T> {
     [name: string]: T;
+}
+
+export interface IConverter {
+  convertToSource(val: any, param: any, dataContext: any): any;
+  convertToTarget(val: any, param: any, dataContext: any): any;
 }
 
 export interface IErrorHandler {

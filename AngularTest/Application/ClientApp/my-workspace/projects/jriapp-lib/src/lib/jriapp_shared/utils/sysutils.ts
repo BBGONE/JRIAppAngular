@@ -1,7 +1,7 @@
 /** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
 import { BRACKETS } from "../consts";
 import {
-    ISubmittable, IErrorNotification, IEditable, IPropertyBag, IBaseObject, IValidatable, IValidationError
+    ISubmittable, IErrorNotification, IEditable, IPropertyBag, IBaseObject, IValidatable, IValidationError, IConverter
 } from "../int";
 import { ERRS } from "../../lang";
 import { ICollection } from "../collection/int";
@@ -29,9 +29,12 @@ function isPropBag(obj: any): obj is IPropertyBag {
 
 export class SysUtils {
     // DUMMY implementations
+    static getConverter: (name: string) => IConverter = (name) => { return null; };
+    static getApp: () => IBaseObject = () => { return null; };
+
     static isBinding: (obj: any) => boolean = () => { return false; };
     static readonly isPropBag: (obj: any) => obj is IPropertyBag = isPropBag;
-
+    
     // DUMMY implementations collection
     static isCollection: (obj: any) => obj is ICollection<any> = dummyIsCollection;
     static getItemByProp: (obj: any, prop: string) => any = () => { return null; };

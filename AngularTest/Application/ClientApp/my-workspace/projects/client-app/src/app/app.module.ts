@@ -4,10 +4,12 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { BindDirective } from 'projects/client-app/src/directives/bind.directive';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    BindDirective
   ],
   imports: [
     BrowserModule,

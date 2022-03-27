@@ -17,48 +17,22 @@
       </li>
     </ul>
   </div>
-  <form *ngIf="productForm$ | async as form" [formGroup]="form">
+
+   <form [formGroup]="productForm">
     <label for="name">Product Name: </label>
-    <input id="name" class="input-control" type="text" formControlName="Name" />
+    <input id="name" class="input-control" type="text" [bind]="currentProduct" bindPath="Name" bindMode="TwoWay" formControlName="Name" />
     <br>
     <label for="price">Price: </label>
-    <input id="price" class="input-control" formControlName="ListPrice" />
+    <input id="price" class="input-control" type="text" [bind]="currentProduct" bindMode="TwoWay" [converter]="decimalConverter" formControlName="ListPrice" />
     <br>
     <label for="date">Sell Date: </label>
-    <input id="date" class="input-control" type="datetime-local" formControlName="SellStartDate" />
+    <input id="date" class="input-control" type="datetime-local" [bind]="currentProduct" bindMode="TwoWay" [converter]="dateTimeConverter" converterParam="YYYY-MM-DDThh:mm" formControlName="SellStartDate" />
+
     <div class="actions">
       <button class="button" (click)="onPreviousProduct()">Previous</button>
       <button class="button" (click)="onNextProduct()">Next</button>
       <button class="button" *ngIf="isHasChanges" (click)="onSubmit()">Submit</button>
     </div>
   </form>
-
-  <!--
-    <div *ngIf="currentProduct as product else loading">
-      <label>
-        Name:
-        <input name="productName" class="input-control" [ngModel]="product.Name" (ngModelChange)="product.Name=$event" />
-      </label>
-      <br />
-      <br />
-      <label>
-        Date:
-        <input name="sellDate" class="input-control" type="datetime-local"
-               [ngModel]="product.SellStartDate | date:'yyyy-MM-ddTHH:mm'"
-               (ngModelChange)="product.SellStartDate = strToDate($event)" />
-      </label>
-      <div class="actions">
-        <button class="button" (click)="onPreviousProduct()">Previous</button>
-        <button class="button" (click)="onNextProduct()">Next</button>
-        <button class="button" *ngIf="isHasChanges" (click)="onSubmit()">Submit</button>
-      </div>
-    </div>
-
-    <ng-template #loading>
-      <div>Loading ...</div>
-    </ng-template>
-  </div>
- -->
-
 
   <router-outlet></router-outlet>
