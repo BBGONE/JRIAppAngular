@@ -236,7 +236,7 @@ export class Binding extends BaseObject implements IBinding {
       this._onSrcErrChanged(errNotif);
     }
   }
-  dispose(): void {
+  override dispose(): void {
     if (this.getIsDisposed()) {
       return;
     }
@@ -668,7 +668,7 @@ export class Binding extends BaseObject implements IBinding {
       }
     }
   }
-  toString(): string {
+  override toString(): string {
     return "Binding";
   }
   get uniqueID(): string {
