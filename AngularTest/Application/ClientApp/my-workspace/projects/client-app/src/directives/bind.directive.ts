@@ -1,10 +1,45 @@
 import { ChangeDetectorRef, Directive, Inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from "@angular/core";
 import { NgControl } from "@angular/forms";
-import { Binding, getBindingOptions, TBindingInfo } from "jriapp-lib";
-import { BindTarget } from "projects/client-app/src/directives/bind-target";
+import { BaseObject, Binding, getBindingOptions, TBindingInfo } from "jriapp-lib";
 import { IConverter } from "projects/client-app/src/logic/converter";
-import { merge, Subject } from "rxjs";
-import { takeUntil } from 'rxjs/operators';
+import { Subscription } from "rxjs";
+
+
+class BindTarget extends BaseObject {
+  private readonly ngControl: NgControl;
+  private readonly changeDetectorRef: ChangeDetectorRef;
+  private readonly subscription: Subscription = new Subscription();
+
+  constructor(control: NgControl,
+    changeDetectorRef: ChangeDetectorRef) {
+    super();
+    this.ngControl = control;
+    this.changeDetectorRef = changeDetectorRef;
+
+    if (!this.ngControl?.valueChanges) {
+      return;
+    }
+
+    this.subscription.add(this.ngControl.valueChanges.subscribe(() => this.objEvents.raiseProp("value")));
+  }
+
+  get value(): any {
+    return this.ngControl.control.value;
+  }
+
+  set value(v: any) {
+    if (this.value !== v) {
+      this.ngControl.control.setValue(v);
+      // probably not needed here, because NgControl handles this (but it does not hurt)
+      this.changeDetectorRef.markForCheck();
+    }
+  }
+
+  override dispose(): void {
+    this.subscription.unsubscribe();
+    super.dispose();
+  }
+}
 
 export type TBindingMode = "OneTime" | "OneWay" | "TwoWay" | "BackWay";
 
@@ -13,9 +48,8 @@ export type TBindingMode = "OneTime" | "OneWay" | "TwoWay" | "BackWay";
 })
 export class BindDirective implements OnDestroy, OnInit, OnChanges  {
   private ngControl: NgControl;
-  private readonly target: BindTarget;
-  private binding: Binding;
-  protected readonly destroy$ = new Subject<void>();
+  private target: BindTarget | null = null;
+  private binding: Binding | null = null;
 
   @Input('bind') dataSource: any;
 
@@ -37,30 +71,19 @@ export class BindDirective implements OnDestroy, OnInit, OnChanges  {
       );
     }
     this.ngControl = control;
-    this.target = new BindTarget(this.ngControl);
-    this.binding = null;
   }
 
   ngOnInit() {
-    if (!this.ngControl?.valueChanges || !this.ngControl?.statusChanges) {
-      return;
-    }
-
-    merge(this.ngControl.valueChanges, this.ngControl.statusChanges)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.raiseTargetValueChanged("value"));
-
+    this.target = new BindTarget(this.ngControl, this.changeDetectorRef);
     this.binding = this.bindDataSource();
   }
 
   ngOnDestroy() {
-    if (this.binding) {
-      this.binding.dispose();
-      this.binding = null;
-    }
+    this.binding?.dispose();
+    this.binding = null;
 
-    this.destroy$.next();
-    this.destroy$.complete();
+    this.target?.dispose();
+    this.target = null;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -98,13 +121,5 @@ export class BindDirective implements OnDestroy, OnInit, OnChanges  {
     const bindOptions = getBindingOptions(bindInfo, this.target, this.dataSource);
     
     return new Binding(bindOptions);
-  }
-
-  private raiseTargetValueChanged(name: string) {
-    this.target.objEvents.raiseProp(<any>name);
-  }
-
-  controlUpdate() {
-    this.changeDetectorRef.markForCheck();
   }
 }
