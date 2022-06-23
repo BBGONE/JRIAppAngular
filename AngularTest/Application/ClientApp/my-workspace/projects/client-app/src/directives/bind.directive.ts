@@ -1,9 +1,9 @@
-import { ChangeDetectorRef, Directive, Inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from "@angular/core";
+import { ChangeDetectorRef, Directive, Inject, Input, OnChanges, OnDestroy, OnInit, Optional, SimpleChanges } from "@angular/core";
 import { NgControl } from "@angular/forms";
 import { BaseObject, Binding, getBindingOptions, TBindingInfo } from "jriapp-lib";
 import { IConverter } from "projects/client-app/src/logic/converter";
 import { Subscription } from "rxjs";
-
+import { DATASOURCE, DataSourceDirective } from "./datasource.directive";
 
 class BindTarget extends BaseObject {
   private readonly ngControl: NgControl;
@@ -46,12 +46,24 @@ export type TBindingMode = "OneTime" | "OneWay" | "TwoWay" | "BackWay";
 @Directive({
   selector: "[bind]"
 })
-export class BindDirective implements OnDestroy, OnInit, OnChanges  {
-  private ngControl: NgControl;
+export class BindDirective implements OnDestroy, OnInit, OnChanges {
+  private readonly subscription: Subscription = new Subscription();
+  private readonly ngControl: NgControl = null;
+  private readonly dataSourceDirective: DataSourceDirective | null;
+
   private target: BindTarget | null = null;
   private binding: Binding | null = null;
 
-  @Input('bind') dataSource: any;
+  get dataSource(): any {
+    if (!this.localDataSource) {
+      return this.dataSourceDirective?.dataSource ?? null;
+    }
+    else {
+      return this.localDataSource;
+    }
+  }
+
+  @Input('bind') localDataSource: any | null = null;
 
   @Input('bindPath') path: string;
 
@@ -62,20 +74,26 @@ export class BindDirective implements OnDestroy, OnInit, OnChanges  {
   @Input('converterParam') converterParam: any = null;
 
   constructor(
-    @Inject(NgControl) control: NgControl,
-    protected readonly changeDetectorRef: ChangeDetectorRef,
+    @Optional() @Inject(NgControl) control: NgControl,
+    @Optional() @Inject(DATASOURCE) dataSourceDirective: DataSourceDirective,
+    @Optional() @Inject(ChangeDetectorRef) private changeDetectorRef?: ChangeDetectorRef | null,
   ) {
-    if (this.ngControl === null) {
+    if (!control) {
       throw new Error(
         `NgControl not injected in ${this.constructor.name}!\n Use [(ngModel)] or [formControl] or formControlName for correct work.`,
       );
     }
+
     this.ngControl = control;
+    this.dataSourceDirective = dataSourceDirective ?? null;
   }
 
   ngOnInit() {
     this.target = new BindTarget(this.ngControl, this.changeDetectorRef);
     this.binding = this.bindDataSource();
+    if (!!this.dataSourceDirective) {
+      this.subscription.add(this.dataSourceDirective.changes$.subscribe(() => { if (!!this.binding) { this.binding.source = this.dataSource; } }));
+    }
   }
 
   ngOnDestroy() {
@@ -84,21 +102,23 @@ export class BindDirective implements OnDestroy, OnInit, OnChanges  {
 
     this.target?.dispose();
     this.target = null;
+
+    this.subscription.unsubscribe();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes["converterParam"] || changes["converter"]) {
-      if (!!this.binding) {
-        this.binding.dispose();
-        this.binding = null;
-      }
-      this.binding = this.bindDataSource();
+    if (!this.target || !this.binding) {
       return;
     }
-    if (!this.binding) {
-      return;
+    if (changes["converterParam"]) {
+      this.binding.param = this.converterParam;
     }
-    if (changes["dataSource"]) {
+
+    if (changes["converter"]) {
+      this.binding.converter = this.converter;
+    }
+
+    if (changes["localDataSource"]) {
       this.binding.source = this.dataSource;
     }
   }
@@ -115,8 +135,7 @@ export class BindDirective implements OnDestroy, OnInit, OnChanges  {
       target: this.target,
       mode: this.mode,
       converter: this.converter,
-      param: this.converterParam,
-      isBind: false
+      converterParam: this.converterParam
     };
     const bindOptions = getBindingOptions(bindInfo, this.target, this.dataSource);
     

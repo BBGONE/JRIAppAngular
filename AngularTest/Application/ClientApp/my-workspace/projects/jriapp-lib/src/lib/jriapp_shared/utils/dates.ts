@@ -2,7 +2,7 @@
 import { StringUtils } from "./strutils";
 import { Checks } from "./checks";
 import { ERRS } from "../../lang";
-import * as moment from 'moment';
+import moment from 'moment';
 
 const { isNt } = Checks, { format: formatStr } = StringUtils;
 

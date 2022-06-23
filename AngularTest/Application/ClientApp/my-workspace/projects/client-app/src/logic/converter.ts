@@ -42,15 +42,15 @@ export class DateConverter implements IConverter {
 export const dateConverter = new DateConverter();
 
 export class DateTimeConverter implements IConverter {
-    convertToSource(val: string, param: string): Date {
-        return strToDate(val, param);
-    }
-    convertToTarget(val: Date, param: string): string {
-        return dateToStr(val, param);
-    }
-    toString() {
-        return "DateTimeConverter";
-    }
+  convertToSource(val: string, param: string): Date {
+    return strToDate(val, param);
+  }
+  convertToTarget(val: Date, param: string): string {
+    return dateToStr(val, param);
+  }
+  toString() {
+    return "DateTimeConverter";
+  }
 }
 export const dateTimeConverter = new DateTimeConverter();
 

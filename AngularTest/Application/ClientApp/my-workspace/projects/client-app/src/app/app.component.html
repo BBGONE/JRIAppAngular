@@ -18,15 +18,15 @@
     </ul>
   </div>
 
-   <form [formGroup]="productForm">
+   <form [formGroup]="productForm" [datasource]="currentProduct">
     <label for="name">Product Name: </label>
-    <input id="name" class="input-control" type="text" [bind]="currentProduct" bindPath="Name" bindMode="TwoWay" formControlName="Name" />
+    <input id="name" class="input-control" type="text" bind bindPath="Name" bindMode="TwoWay" formControlName="Name" />
     <br>
     <label for="price">Price: </label>
-    <input id="price" class="input-control" type="text" [bind]="currentProduct" bindMode="TwoWay" [converter]="decimalConverter" formControlName="ListPrice" />
+    <input id="price" class="input-control" type="text" bind bindMode="TwoWay" [converter]="decimalConverter" formControlName="ListPrice" />
     <br>
     <label for="date">Sell Date: </label>
-    <input id="date" class="input-control" type="datetime-local" [bind]="currentProduct" bindMode="TwoWay" [converter]="dateTimeConverter" converterParam="YYYY-MM-DDThh:mm" formControlName="SellStartDate" />
+    <input id="date" class="input-control" type="datetime-local" bind bindMode="TwoWay" [converter]="dateTimeConverter" converterParam="YYYY-MM-DDThh:mm" formControlName="SellStartDate" />
 
     <div class="actions">
       <button class="button" (click)="onPreviousProduct()">Previous</button>
@@ -36,3 +36,4 @@
   </form>
 
   <router-outlet></router-outlet>
+  </div>

@@ -5,11 +5,13 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BindDirective } from 'projects/client-app/src/directives/bind.directive';
+import { DataSourceDirective } from '../directives/datasource.directive';
 
 @NgModule({
   declarations: [
     AppComponent,
-    BindDirective
+    BindDirective,
+    DataSourceDirective
   ],
   imports: [
     BrowserModule,

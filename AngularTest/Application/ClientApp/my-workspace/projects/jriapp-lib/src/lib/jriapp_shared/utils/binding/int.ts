@@ -20,8 +20,7 @@ export type TBindingOptions = {
   isSourceFixed?: boolean;
   mode?: BINDING_MODE;
   converter?: IConverter;
-  param?: any;
-  isBind?: boolean;
+  converterParam?: any;
 };
 
 // the result of parsing a data binding expression - typically all properties are strings here
@@ -33,8 +32,7 @@ export type TBindingInfo = {
   source?: any;
   mode?: TBindingMode;
   converter?: any;
-  param?: any;
-  isBind?: boolean;
+  converterParam?: any;
 };
 
 export interface IBinding extends IBaseObject {

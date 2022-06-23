@@ -85,8 +85,7 @@ export function getBindingOptions(bindInfo: TBindingInfo, defTarget: IBaseObject
     isSourceFixed: false,
     mode: BINDING_MODE.OneWay,
     converter: null,
-    param: null,
-    isBind: false
+    converterParam: null
   };
   let converter: IConverter;
   if (isString(bindInfo.converter)) {
@@ -107,9 +106,8 @@ export function getBindingOptions(bindInfo: TBindingInfo, defTarget: IBaseObject
     bindingOpts.targetPath = bindInfo.targetPath;
   }
 
-  if (!!bindInfo.param) {
-    bindingOpts.param = bindInfo.param;
-    bindingOpts.isBind = bindInfo.isBind;
+  if (!!bindInfo.converterParam) {
+    bindingOpts.converterParam = bindInfo.converterParam;
   }
 
   if (!!bindInfo.mode) {
@@ -164,8 +162,6 @@ export class Binding extends BaseObject implements IBinding {
   private _converter: IConverter;
   // converter Param
   private _param: any;
-  // Is converter Param the bind expression and needs to be evaluated?
-  private _isBindParam: boolean;
   private _srcPath: string[];
   private _tgtPath: string[];
   private _srcFixed: boolean;
@@ -209,8 +205,7 @@ export class Binding extends BaseObject implements IBinding {
     this._state = null;
     this._mode = options.mode;
     this._converter = !options.converter ? null : options.converter;
-    this._param = options.param;
-    this._isBindParam = !!options.isBind;
+    this._param = options.converterParam;
     this._srcPath = getPathParts(options.sourcePath);
     this._tgtPath = getPathParts(options.targetPath);
     if (this._tgtPath.length < 1) {
@@ -739,20 +734,19 @@ export class Binding extends BaseObject implements IBinding {
   get converter(): IConverter {
     return this._converter;
   }
+  set converter(val: IConverter) {
+    if (this._converter !== val) {
+      this._converter = val;
+      this._update();
+    }
+  }
   get param(): any {
-    if (this._isBindParam) {
-      if (isNt(this._param)) {
-        return this._param;
-      }
-      const bindparts = <string[]>this._param;
-      let source = this.source;
-      if (bindparts.length > 1) {
-        //resolve source (second path relative to the application in the array)
-        source = resolvePath(this.app, bindparts[1]);
-      }
-      return resolvePath(source, bindparts[0]);
-    } else {
-      return this._param;
+    return this._param;
+  }
+  set param(val: any) {
+    if (this._param !== val) {
+      this._param = val;
+      this._update();
     }
   }
   get isDisabled(): boolean {
