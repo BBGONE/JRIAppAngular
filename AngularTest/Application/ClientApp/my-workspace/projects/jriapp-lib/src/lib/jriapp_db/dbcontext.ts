@@ -86,7 +86,6 @@ export abstract class DbContext<TDbSets extends DbSets = DbSets, TMethods = any,
   private _pendingSubmit: { promise: IPromise; };
   private _waitQueue: WaitQueue;
   private _internal: IInternalDbxtMethods;
-  private 
 
   constructor(options: {
     serviceUrl: string;
@@ -252,7 +251,7 @@ export abstract class DbContext<TDbSets extends DbSets = DbSets, TMethods = any,
     reqs.forEach((r) => { r.req.abort(); });
   }
   protected _getMethodParams(methodInfo: IQueryInfo, args: { [paramName: string]: any; }): IInvokeRequest {
-    const self = this, methodName: string = methodInfo.methodName,
+    const methodName: string = methodInfo.methodName,
       data: IInvokeRequest = { methodName: methodName, paramInfo: { parameters: [] } },
       paramInfos = methodInfo.parameters;
 
