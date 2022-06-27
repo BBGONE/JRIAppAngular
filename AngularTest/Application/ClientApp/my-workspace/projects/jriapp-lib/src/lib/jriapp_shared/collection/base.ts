@@ -15,7 +15,7 @@ import {
 import { CollUtils, ValueUtils } from "./utils";
 
 
-const utils = Utils, { forEach, getTimeZoneOffset, getNewID, Indexer } = utils.core,
+const utils = Utils, { forEach, getNewID, Indexer } = utils.core,
   { format, startsWith } = utils.str, { _undefined, isArray, isUndefined } = utils.check,
   sys = utils.sys, { stringifyValue } = ValueUtils, { getObjectField } = CollUtils;
 
