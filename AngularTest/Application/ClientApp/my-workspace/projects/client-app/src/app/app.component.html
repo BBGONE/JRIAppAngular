@@ -26,7 +26,7 @@
     <input id="price" class="input-control" type="text" bind bindMode="TwoWay" [converter]="decimalConverter" formControlName="ListPrice" />
     <br>
     <label for="date">Sell Date: </label>
-    <input id="date" class="input-control" type="datetime-local" bind bindMode="TwoWay" [converter]="dateTimeConverter" converterParam="YYYY-MM-DDThh:mm" formControlName="SellStartDate" />
+    <input id="date" class="input-control" bind bindMode="TwoWay" [converter]="dateTimeConverter" converterParam="YYYY-MM-DDTHH:mm" formControlName="SellStartDate" />
 
     <div class="actions">
       <button class="button" (click)="onPreviousProduct()">Previous</button>

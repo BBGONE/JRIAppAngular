@@ -27,13 +27,13 @@ export class DateConverter implements IConverter {
         if (!val) {
             return null;
         }
-        return dateTimeConverter.convertToSource(val, dateFormat);
+      return dateTimeConverter.convertToSource(val, dateFormat);
     }
     convertToTarget(val: any, _param: any): string {
         if (isNt(val)) {
             return "";
         }
-        return  dateTimeConverter.convertToTarget(val, dateFormat);
+        return dateTimeConverter.convertToTarget(val, dateFormat);
     }
     toString() {
         return "DateConverter";
@@ -43,10 +43,12 @@ export const dateConverter = new DateConverter();
 
 export class DateTimeConverter implements IConverter {
   convertToSource(val: string, param: string): Date {
-    return strToDate(val, param);
+    const res = strToDate(val, param);
+    return res;
   }
   convertToTarget(val: Date, param: string): string {
-    return dateToStr(val, param);
+    const res = dateToStr(val, param);
+    return res;
   }
   toString() {
     return "DateTimeConverter";

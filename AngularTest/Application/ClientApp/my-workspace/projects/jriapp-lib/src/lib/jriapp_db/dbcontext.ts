@@ -1,27 +1,21 @@
 /** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
-import { DATA_TYPE, COLL_CHANGE_REASON } from "../jriapp_shared/collection/const";
 import {
-    IIndexer, IPromise, IBaseObject, TEventHandler, TErrorHandler, LocaleERRS as ERRS,
-  BaseObject, Utils, WaitQueue, Lazy, IStatefulPromise, IAbortablePromise, PromiseState
+    BaseObject, IAbortablePromise, IBaseObject, IIndexer, IPromise, IStatefulPromise, Lazy, LocaleERRS as ERRS, PromiseState, TErrorHandler, TEventHandler, Utils, WaitQueue
 } from "../jriapp_shared";
+import { COLL_CHANGE_REASON, DATA_TYPE } from "../jriapp_shared/collection/const";
 import { ValueUtils } from "../jriapp_shared/collection/utils";
-import {
-    IEntityItem, IRefreshRequest, IRefreshResponse, IQueryResult, IQueryInfo, IAssociationInfo, IAssocConstructorOptions,
-    IPermissionsInfo, IInvokeRequest, IInvokeResponse, IQueryRequest, IQueryResponse, ITrackAssoc,
-    IChangeRequest, IChangeResponse, IRowInfo, ISubset
-} from "./int";
+import { Association } from "./association";
 import { DATA_OPER, REFRESH_MODE } from "./const";
+import { TDataQuery } from "./dataquery";
 import { TDbSet } from "./dbset";
 import { DbSets, TDbSetCreatingArgs } from "./dbsets";
-import { Association } from "./association";
-import { TDataQuery } from "./dataquery";
 import {
-    AccessDeniedError, ConcurrencyError, SvcValidationError,
-    DataOperationError, SubmitError
+    AccessDeniedError, ConcurrencyError, DataOperationError, SubmitError, SvcValidationError
 } from "./error";
+import { IAssocConstructorOptions, IAssociationInfo, IChangeRequest, IChangeResponse, IEntityItem, IInvokeRequest, IInvokeResponse, IPermissionsInfo, IQueryInfo, IQueryRequest, IQueryResponse, IQueryResult, IRefreshRequest, IRefreshResponse, IRowInfo, ISubset, ITrackAssoc } from "./int";
 
 const utils = Utils, http = utils.http, { isArray, isNt, isFunc, isString } = utils.check,
-  { format, endsWith } = utils.str, { getTimeZoneOffset, merge, Indexer } = utils.core, ERROR = utils.err,
+  { format, endsWith } = utils.str, { merge, Indexer } = utils.core, ERROR = utils.err,
   { stringifyValue } = ValueUtils, { delay, createDeferred } = utils.async;
 
 const enum DATA_SVC_METH {
@@ -91,7 +85,6 @@ export abstract class DbContext<TDbSets extends DbSets = DbSets, TMethods = any,
   private _isSubmiting: boolean;
   private _isHasChanges: boolean;
   private _pendingSubmit: { promise: IPromise; };
-  private _serverTimezone: number;
   private _waitQueue: WaitQueue;
   private _internal: IInternalDbxtMethods;
 
@@ -110,8 +103,6 @@ export abstract class DbContext<TDbSets extends DbSets = DbSets, TMethods = any,
     this._isSubmiting = false;
     this._isHasChanges = false;
     this._pendingSubmit = null;
-    // at first init it with client side timezone
-    this._serverTimezone = getTimeZoneOffset();
     this._waitQueue = new WaitQueue(this);
     this._internal = {
       onItemRefreshed: (res: IRefreshResponse, item: IEntityItem) => {
@@ -196,7 +187,6 @@ export abstract class DbContext<TDbSets extends DbSets = DbSets, TMethods = any,
     }
   }
   protected _updatePermissions(info: IPermissionsInfo): void {
-    this._serverTimezone = info.serverTimezone;
     info.permissions.forEach((perms) => {
       const dbSet = this.findDbSet(perms.dbSetName);
       if (!!dbSet) {
@@ -298,12 +288,12 @@ export abstract class DbContext<TDbSets extends DbSets = DbSets, TMethods = any,
         const arr: string[] = [];
         for (const _val of val) {
           // first convert all values to string
-          arr.push(stringifyValue(_val, pinfo.dateConversion, pinfo.dataType, self.serverTimezone));
+          arr.push(stringifyValue(_val, pinfo.dataType));
         }
 
         value = JSON.stringify(arr);
       } else {
-        value = stringifyValue(val, pinfo.dateConversion, pinfo.dataType, self.serverTimezone);
+        value = stringifyValue(val, pinfo.dataType);
       }
 
       data.paramInfo.parameters.push({ name: pinfo.name, value: value });
@@ -956,9 +946,6 @@ export abstract class DbContext<TDbSets extends DbSets = DbSets, TMethods = any,
   }
   get isSubmiting(): boolean {
     return this._isSubmiting;
-  }
-  get serverTimezone(): number {
-    return this._serverTimezone;
   }
   get isHasChanges(): boolean {
     return this._isHasChanges;

@@ -1,26 +1,19 @@
 /** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
-import {
-    DATE_CONVERSION, DATA_TYPE, FIELD_TYPE, SORT_ORDER,
-    ITEM_STATUS, COLL_CHANGE_REASON, COLL_CHANGE_TYPE, COLL_CHANGE_OPER
-} from "./const";
-import { IFieldInfo } from "./int";
-import { IPromise } from "../utils/ipromise";
-import {
-    IIndexer, IValidationInfo, TEventHandler, TPropChangedHandler, IBaseObject, TPriority
-} from "../int";
-import { BaseObject }  from "../object";
 import { ERRS } from "../../lang";
-import { WaitQueue } from "../utils/waitqueue";
-import { Utils } from "../utils/utils";
-import { ICollectionItem, ICollection, ICollectionOptions, IPermissions, IInternalCollMethods, ICollChangedArgs,
-    ICancellableArgs, ICollFillArgs, ICollEndEditArgs, ICollItemArgs, ICollItemStatusArgs,
-    ICollValidateFieldArgs, ICollValidateItemArgs, ICurrentChangingArgs, ICommitChangesArgs, IItemAddedArgs, IPageChangingArgs,
-    IErrorsList, IErrors
-} from "./int";
-import { ItemAspect } from "./aspect";
-
-import { ValueUtils, CollUtils } from "./utils";
 import { ValidationError } from "../errors";
+import { IBaseObject, IIndexer, IValidationInfo, TEventHandler, TPriority, TPropChangedHandler } from "../int";
+import { BaseObject } from "../object";
+import { IPromise } from "../utils/ipromise";
+import { Utils } from "../utils/utils";
+import { WaitQueue } from "../utils/waitqueue";
+import { ItemAspect } from "./aspect";
+import { COLL_CHANGE_OPER, COLL_CHANGE_REASON, COLL_CHANGE_TYPE, DATA_TYPE, DATE_CONVERSION, FIELD_TYPE, ITEM_STATUS, SORT_ORDER } from "./const";
+import {
+    ICancellableArgs, ICollChangedArgs, ICollection, ICollectionItem, ICollectionOptions, ICollEndEditArgs, ICollFillArgs, ICollItemArgs, ICollItemStatusArgs,
+    ICollValidateFieldArgs, ICollValidateItemArgs, ICommitChangesArgs, ICurrentChangingArgs, IErrors, IErrorsList, IFieldInfo, IInternalCollMethods, IItemAddedArgs, IPageChangingArgs, IPermissions
+} from "./int";
+import { CollUtils, ValueUtils } from "./utils";
+
 
 const utils = Utils, { forEach, getTimeZoneOffset, getNewID, Indexer } = utils.core,
   { format, startsWith } = utils.str, { _undefined, isArray, isUndefined } = utils.check,
@@ -402,8 +395,7 @@ export abstract class BaseCollection<TItem extends ICollectionItem> extends Base
     return this._EditingItem;
   }
   protected _getStrValue(val: any, fieldInfo: IFieldInfo): string {
-    const dcnv = fieldInfo.dateConversion, stz = getTimeZoneOffset();
-    return stringifyValue(val, dcnv, fieldInfo.dataType, stz);
+    return stringifyValue(val, fieldInfo.dataType);
   }
   protected _onBeforeEditing(item: TItem, isBegin: boolean, isCanceled: boolean): void {
     if (this._isUpdating) {

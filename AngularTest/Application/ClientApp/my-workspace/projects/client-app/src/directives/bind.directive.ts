@@ -102,7 +102,6 @@ export class BindDirective implements OnDestroy, OnInit, OnChanges {
 
     this.target?.dispose();
     this.target = null;
-
     this.subscription.unsubscribe();
   }
 

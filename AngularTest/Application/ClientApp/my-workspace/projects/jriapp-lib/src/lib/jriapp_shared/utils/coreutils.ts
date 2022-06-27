@@ -1,7 +1,7 @@
-﻿/** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
+/** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
 import { IIndexer } from "../int";
-import { StringUtils } from "./strutils";
 import { Checks } from "./checks";
+import { StringUtils } from "./strutils";
 
 const { isHasProp, _undefined, isBoolean, isArray, isPlainObject, isNt, isString } = Checks,
     { format: formatStr, fastTrim: trim } = StringUtils, { getOwnPropertyNames, getOwnPropertyDescriptor, keys: objectKeys } = Object;

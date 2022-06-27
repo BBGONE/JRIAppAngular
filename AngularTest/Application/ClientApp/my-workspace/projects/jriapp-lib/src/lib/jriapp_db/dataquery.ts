@@ -1,12 +1,12 @@
 /** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
-import { FILTER_TYPE, SORT_ORDER, DATE_CONVERSION, DATA_TYPE } from "../jriapp_shared/collection/const";
-import { IStatefulPromise, BaseObject, Utils, IIndexer, LocaleERRS as ERRS } from "../jriapp_shared";
+import { BaseObject, IIndexer, IStatefulPromise, LocaleERRS as ERRS, Utils } from "../jriapp_shared";
+import { DATA_TYPE, FILTER_TYPE, SORT_ORDER } from "../jriapp_shared/collection/const";
 import { IFieldInfo } from "../jriapp_shared/collection/int";
 import { ValueUtils } from "../jriapp_shared/collection/utils";
-import { IEntityItem, IQueryInfo, IFilterInfo, ISortInfo, IQueryResult } from "./int";
 import { DataCache } from "./datacache";
-import { DbSet } from "./dbset";
 import { DbContext } from "./dbcontext";
+import { DbSet } from "./dbset";
+import { IEntityItem, IFilterInfo, IQueryInfo, IQueryResult, ISortInfo } from "./int";
 
 const utils = Utils, { isNt, isArray, isDate } = utils.check, { format } = utils.str, { Indexer } = utils.core,
   arrHelper = utils.arr, valUtils = ValueUtils;
@@ -89,7 +89,6 @@ export class DataQuery<TItem extends IEntityItem = IEntityItem, TObj = any> exte
   }
   private _addFilterItem(fieldName: string, operand: FILTER_TYPE, value: any[], checkFieldName = true): void {
     let fkind = FILTER_TYPE.Equals, vals: any[] = [];
-    const stz = this.serverTimezone;
     if (!isArray(value)) {
       vals = [value];
     } else {
@@ -103,9 +102,9 @@ export class DataQuery<TItem extends IEntityItem = IEntityItem, TObj = any> exte
     }
 
     if (!!fld) {
-      vals = tmpVals.map((v) => valUtils.stringifyValue(v, fld.dateConversion, fld.dataType, stz));
+      vals = tmpVals.map((v) => valUtils.stringifyValue(v, fld.dataType));
     } else {
-      vals = tmpVals.map((v) => valUtils.stringifyValue(v, DATE_CONVERSION.None, isDate(v) ? DATA_TYPE.Date : DATA_TYPE.None, stz));
+      vals = tmpVals.map((v) => valUtils.stringifyValue(v,isDate(v) ? DATA_TYPE.Date : DATA_TYPE.None));
     }
 
     switch (operand) {
@@ -208,9 +207,6 @@ export class DataQuery<TItem extends IEntityItem = IEntityItem, TObj = any> exte
   }
   override toString(): string {
     return "DataQuery";
-  }
-  get serverTimezone(): number {
-    return this._dbSet.dbContext.serverTimezone;
   }
   get dbSet(): DbSet<TItem, TObj, DbContext> {
     return this._dbSet;

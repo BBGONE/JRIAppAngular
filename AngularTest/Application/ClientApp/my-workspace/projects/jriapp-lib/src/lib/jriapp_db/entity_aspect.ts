@@ -1,17 +1,17 @@
 /** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
-import { FIELD_TYPE, DATA_TYPE, ITEM_STATUS, VALS_VERSION } from "../jriapp_shared/collection/const";
 import {
-    IBaseObject, IPromise, IIndexer, IStatefulPromise, LocaleERRS as ERRS, Utils, IValidationError
+    IBaseObject, IIndexer, IPromise, IStatefulPromise, IValidationError, LocaleERRS as ERRS, Utils
 } from "../jriapp_shared";
-import { ValidationError } from "../jriapp_shared/errors";
+import { ItemAspect } from "../jriapp_shared/collection/aspect";
+import { DATA_TYPE, FIELD_TYPE, ITEM_STATUS, VALS_VERSION } from "../jriapp_shared/collection/const";
 import { ICancellableArgs, IFieldInfo } from "../jriapp_shared/collection/int";
 import { ValueUtils } from "../jriapp_shared/collection/utils";
-import { ItemAspect } from "../jriapp_shared/collection/aspect";
+import { ValidationError } from "../jriapp_shared/errors";
 import { FLAGS, REFRESH_MODE } from "./const";
 import { DbContext } from "./dbcontext";
-import { IEntityItem, IValueChange, IRowInfo } from "./int";
 import { DbSet } from "./dbset";
 import { SubmitError } from "./error";
+import { IEntityItem, IRowInfo, IValueChange } from "./int";
 
 const utils = Utils, { _undefined } = utils.check, { format } = utils.str, { getValue, setValue, uuid } = utils.core,
   { compareVals, parseValue } = ValueUtils, sys = utils.sys;
@@ -331,8 +331,8 @@ export class EntityAspect<TItem extends IEntityItem = IEntityItem, TObj extends 
     if (!fld) {
       throw new Error(format(ERRS.ERR_DBSET_INVALID_FIELDNAME, self.dbSetName, fullName));
     }
-    const stz = self.serverTimezone, dataType = fld.dataType, dcnv = fld.dateConversion;
-    let newVal = parseValue(val, dataType, dcnv, stz), oldVal = self._getValue(fullName, VALS_VERSION.Current);
+    const dataType = fld.dataType;
+    let newVal = parseValue(val, dataType), oldVal = self._getValue(fullName, VALS_VERSION.Current);
     switch (refreshMode) {
       case REFRESH_MODE.CommitChanges:
         {
@@ -615,9 +615,6 @@ export class EntityAspect<TItem extends IEntityItem = IEntityItem, TObj extends 
   }
   get dbSetName(): string {
     return this.dbSet.dbSetName;
-  }
-  get serverTimezone(): number {
-    return this.dbSet.dbContext.serverTimezone;
   }
   get dbSet(): DbSet<TItem, TObj, TDbContext> {
     return <any>this.coll;

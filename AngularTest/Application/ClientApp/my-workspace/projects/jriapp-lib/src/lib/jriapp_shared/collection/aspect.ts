@@ -1,14 +1,13 @@
 /** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
-import { FIELD_TYPE, ITEM_STATUS, VALS_VERSION } from "./const";
-import { IFieldInfo } from "./int";
-import { IVoidPromise } from "../utils/ipromise";
-import { IIndexer, IValidationInfo, TEventHandler, IErrorNotification } from "../int";
-import { BaseObject } from "../object";
-import { Utils } from "../utils/utils";
-import { ICollectionItem, IItemAspect, ICancellableArgs, ITEM_EVENTS } from "./int";
-import { BaseCollection } from "./base";
-import { CollUtils } from "./utils";
 import { ValidationError } from "../errors";
+import { IErrorNotification, IIndexer, IValidationInfo, TEventHandler } from "../int";
+import { BaseObject } from "../object";
+import { IVoidPromise } from "../utils/ipromise";
+import { Utils } from "../utils/utils";
+import { BaseCollection } from "./base";
+import { FIELD_TYPE, ITEM_STATUS, VALS_VERSION } from "./const";
+import { ICancellableArgs, ICollectionItem, IFieldInfo, IItemAspect, ITEM_EVENTS } from "./int";
+import { CollUtils } from "./utils";
 import { Validations } from "./validation";
 
 const utils = Utils, { forEach, getValue, setValue, Indexer } = utils.core, { isNt } = utils.check,

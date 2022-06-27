@@ -71,7 +71,6 @@ export interface IPermissions extends ICollPermissions {
 }
 
 export interface IPermissionsInfo {
-    serverTimezone: number;
     permissions: IPermissions[];
 }
 

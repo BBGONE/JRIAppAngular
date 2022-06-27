@@ -1,13 +1,12 @@
-﻿/** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
+/** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
 import {
-    DATE_CONVERSION, DATA_TYPE, SORT_ORDER, FIELD_TYPE, COLL_CHANGE_OPER,
-    COLL_CHANGE_REASON, COLL_CHANGE_TYPE, ITEM_STATUS
-} from "./const";
+    IBaseObject, IEditable, IErrorNotification, IIndexer, ISubmittable, IValidationInfo, TEventHandler, TPriority, TPropChangedHandler
+} from "../int";
 import { IPromise } from "../utils/ipromise";
 import {
-    IBaseObject, IErrorNotification, IEditable, ISubmittable, TEventHandler, TPropChangedHandler,
-    IValidationInfo, TPriority, IIndexer
-} from "../int";
+    COLL_CHANGE_OPER,
+    COLL_CHANGE_REASON, COLL_CHANGE_TYPE, DATA_TYPE, DATE_CONVERSION, FIELD_TYPE, ITEM_STATUS, SORT_ORDER
+} from "./const";
 
 export const PROP_NAME = {
     isEditing: "isEditing",
@@ -203,11 +202,11 @@ export interface ICollection<TItem extends ICollectionItem> extends ISimpleColle
 }
 
 export interface IValueUtils {
-    valueToDate(val: string, dtcnv: DATE_CONVERSION, serverTZ: number): Date;
-    dateToValue(dt: Date, dtcnv: DATE_CONVERSION, serverTZ: number): string;
+    valueToDate(val: string): Date;
+    dateToValue(dt: Date): string;
     compareVals(v1: any, v2: any, dataType: DATA_TYPE): boolean;
-    stringifyValue(v: any, dtcnv: DATE_CONVERSION, dataType: DATA_TYPE, serverTZ: number): string;
-    parseValue(v: string, dataType: DATA_TYPE, dtcnv: DATE_CONVERSION, serverTZ: number): any;
+    stringifyValue(v: any, dataType: DATA_TYPE): string;
+    parseValue(v: string, dataType: DATA_TYPE): any;
 }
 
 export interface IPropInfo {

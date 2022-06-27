@@ -1,27 +1,14 @@
 /** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
-import {
-    FIELD_TYPE, SORT_ORDER, COLL_CHANGE_REASON, COLL_CHANGE_TYPE, COLL_CHANGE_OPER, ITEM_STATUS
-} from "../jriapp_shared/collection/const";
-import {
-    IIndexer, IValidationInfo, TEventHandler, IBaseObject,
-    IPromise, TPriority, LocaleERRS as ERRS, Debounce, Utils
-} from "../jriapp_shared";
-import {
-    IInternalCollMethods, IFieldInfo
-} from "../jriapp_shared/collection/int";
+import { Debounce, IBaseObject, IIndexer, IPromise, IValidationInfo, LocaleERRS as ERRS, TEventHandler, TPriority, Utils } from "../jriapp_shared";
 import { BaseCollection } from "../jriapp_shared/collection/base";
-import {
-    ValueUtils, CollUtils
-} from "../jriapp_shared/collection/utils";
-import {
-    IFieldName, IEntityItem, IRowInfo, ITrackAssoc, IQueryResponse,
-    IPermissions, IDbSetConstuctorOptions, IAssociationInfo, ICalcFieldImpl, INavFieldImpl,
-    IQueryResult, IRowData, IDbSetLoadedArgs
-} from "./int";
+import { COLL_CHANGE_OPER, COLL_CHANGE_REASON, COLL_CHANGE_TYPE, FIELD_TYPE, ITEM_STATUS, SORT_ORDER } from "../jriapp_shared/collection/const";
+import { IFieldInfo, IInternalCollMethods } from "../jriapp_shared/collection/int";
+import { CollUtils, ValueUtils } from "../jriapp_shared/collection/utils";
 import { REFRESH_MODE } from "./const";
 import { DataQuery, TDataQuery } from "./dataquery";
 import { DbContext } from "./dbcontext";
 import { EntityAspect } from "./entity_aspect";
+import { IAssociationInfo, ICalcFieldImpl, IDbSetConstuctorOptions, IDbSetLoadedArgs, IEntityItem, IFieldName, INavFieldImpl, IPermissions, IQueryResponse, IQueryResult, IRowData, IRowInfo, ITrackAssoc } from "./int";
 
 const utils = Utils, { isArray, isNt } = utils.check, { format } = utils.str,
   { getValue, setValue, merge, forEach, Indexer } = utils.core, ERROR = utils.err,
@@ -362,7 +349,7 @@ export abstract class DbSet<TItem extends IEntityItem = IEntityItem, TObj extend
     item._aspect._updateDependents(dependents);
   }
   protected _applyFieldVals(vals: any, path: string, values: any[], names: IFieldName[]) {
-    const self = this, stz = self.dbContext.serverTimezone;
+    const self = this;
     values.forEach((value, index) => {
       const name: IFieldName = names[index], fieldName = path + name.n,
         fld = self.getFieldInfo(fieldName);
@@ -375,7 +362,7 @@ export abstract class DbSet<TItem extends IEntityItem = IEntityItem, TObj extend
         self._applyFieldVals(vals, fieldName + ".", <any[]>value, name.p);
       } else {
         // for other fields the value is a string, which is parsed to a typed value
-        const val = parseValue(value, fld.dataType, fld.dateConversion, stz);
+        const val = parseValue(value, fld.dataType);
         setValue(vals, fieldName, val, false);
       }
     });
@@ -444,8 +431,7 @@ export abstract class DbSet<TItem extends IEntityItem = IEntityItem, TObj extend
     calcDef.getFunc = getFunc;
   }
   protected override _getStrValue(val: any, fieldInfo: IFieldInfo): string {
-    const dcnv = fieldInfo.dateConversion, stz = this.dbContext.serverTimezone;
-    return stringifyValue(val, dcnv, fieldInfo.dataType, stz);
+    return stringifyValue(val, fieldInfo.dataType);
   }
   protected _getKeyValue(vals: any): string {
     const pkFlds = this._pkFields, len = pkFlds.length;

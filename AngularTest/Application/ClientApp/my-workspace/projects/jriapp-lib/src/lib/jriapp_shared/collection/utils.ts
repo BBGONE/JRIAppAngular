@@ -1,11 +1,11 @@
-﻿/** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
-import { FIELD_TYPE, DATE_CONVERSION, DATA_TYPE } from "../collection/const";
+/** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
+import { ERRS } from "../../lang";
+import { DATA_TYPE, FIELD_TYPE } from "../collection/const";
 import { IFieldInfo } from "../collection/int";
 import { Utils } from "../utils/utils";
-import { ERRS } from "../../lang";
 import { IValueUtils } from "./int";
 
-const utils = Utils, { getTimeZoneOffset, parseBool, getValue, setValue } = utils.core, { format } = utils.str,
+const utils = Utils, { parseBool, getValue, setValue } = utils.core, { format } = utils.str,
     { _undefined, isArray, isDate, isString, isBoolean, isNumber, isNt } = utils.check;
 
 function pad(num: number): string {
@@ -15,42 +15,35 @@ function pad(num: number): string {
     return "" + num;
 }
 
-function dateToString(dt: Date): string {
-    return ("" + dt.getFullYear()) +
-        "-" + pad(dt.getMonth() + 1) +
-        "-" + pad(dt.getDate()) +
-        "T" + pad(dt.getHours()) +
-        ":" + pad(dt.getMinutes()) +
-        ":" + pad(dt.getSeconds()) +
-        "." + (dt.getMilliseconds() / 1000).toFixed(3).slice(2, 5) + "Z";
+export function dateToString(dt: Date): string {
+  return ("" + dt.getFullYear()) +
+    "-" + pad(dt.getMonth() + 1) +
+    "-" + pad(dt.getDate()) +
+    "T" + pad(dt.getHours()) +
+    ":" + pad(dt.getMinutes()) +
+    ":" + pad(dt.getSeconds()) +
+    "." + (dt.getMilliseconds() / 1000).toFixed(3).slice(2, 5) + "Z";
+}
+
+export function dateToUTCString(dt: Date): string {
+  return ("" + dt.getUTCFullYear()) +
+    "-" + pad(dt.getUTCMonth() + 1) +
+    "-" + pad(dt.getUTCDate()) +
+    "T" + pad(dt.getUTCHours()) +
+    ":" + pad(dt.getUTCMinutes()) +
+    ":" + pad(dt.getUTCSeconds()) +
+    "." + (dt.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5) + "Z";
 }
 
 export const ValueUtils: IValueUtils = {
-    valueToDate: function (val: string, dtcnv: DATE_CONVERSION, serverTZ: number): Date {
+    valueToDate: function (val: string): Date {
         if (!val) {
             return null;
         }
         const dt = new Date(val);
-        const clientTZ = getTimeZoneOffset();
-        // make fix for timezone
-        dt.setMinutes(dt.getMinutes() + clientTZ);
-
-        switch (dtcnv) {
-            case DATE_CONVERSION.None:
-                break;
-            case DATE_CONVERSION.ServerLocalToClientLocal:
-                dt.setMinutes(dt.getMinutes() + serverTZ); // ServerToUTC
-                dt.setMinutes(dt.getMinutes() - clientTZ); // UtcToLocal
-                break;
-            case DATE_CONVERSION.UtcToClientLocal:
-                dt.setMinutes(dt.getMinutes() - clientTZ); // UtcToLocal
-                break;
-            default:
-                throw new Error(format(ERRS.ERR_PARAM_INVALID, "dtcnv", dtcnv));
-        }
         return dt;
     },
-    dateToValue: function (dt: Date, dtcnv: DATE_CONVERSION, serverTZ: number): string {
+    dateToValue: function (dt: Date): string {
         if (dt === null) {
             return null;
         }
@@ -58,23 +51,7 @@ export const ValueUtils: IValueUtils = {
         if (!isDate(dt)) {
             throw new Error(format(ERRS.ERR_PARAM_INVALID, "dt", dt));
         }
-
-        const clientTZ = getTimeZoneOffset();
-        switch (dtcnv) {
-            case DATE_CONVERSION.None:
-                break;
-            case DATE_CONVERSION.ServerLocalToClientLocal:
-                dt.setMinutes(dt.getMinutes() + clientTZ); // LocalToUTC
-                dt.setMinutes(dt.getMinutes() - serverTZ); // UtcToServer
-                break;
-            case DATE_CONVERSION.UtcToClientLocal:
-                dt.setMinutes(dt.getMinutes() + clientTZ); // LocalToUTC
-                break;
-            default:
-                throw new Error(format(ERRS.ERR_PARAM_INVALID, "dtcnv", dtcnv));
-        }
-
-        return dateToString(dt);
+        return dateToUTCString(dt);
     },
     compareVals: function (v1: any, v2: any, dataType: DATA_TYPE): boolean {
         if ((v1 === null && v2 !== null) || (v1 !== null && v2 === null)) {
@@ -89,7 +66,7 @@ export const ValueUtils: IValueUtils = {
                 return v1 === v2;
         }
     },
-    stringifyValue: function (v: any, dtcnv: DATE_CONVERSION, dataType: DATA_TYPE, serverTZ: number): string {
+    stringifyValue: function (v: any, dataType: DATA_TYPE): string {
         let res: string = null;
 
         if (isNt(v)) {
@@ -98,7 +75,7 @@ export const ValueUtils: IValueUtils = {
 
         function conv(v: any): string {
             if (isDate(v)) {
-                return ValueUtils.dateToValue(v, dtcnv, serverTZ);
+                return ValueUtils.dateToValue(v);
             } else if (isArray(v)) {
                 return JSON.stringify(v);
             } else if (isString(v)) {
@@ -138,7 +115,7 @@ export const ValueUtils: IValueUtils = {
             case DATA_TYPE.Date:
             case DATA_TYPE.Time:
                 if (isDate(v)) {
-                    res = ValueUtils.dateToValue(v, dtcnv, serverTZ);
+                    res = ValueUtils.dateToValue(v);
                     isOK = true;
                 }
                 break;
@@ -157,7 +134,7 @@ export const ValueUtils: IValueUtils = {
         }
         return res;
     },
-    parseValue: function (v: string, dataType: DATA_TYPE, dtcnv: DATE_CONVERSION, serverTZ: number): any {
+    parseValue: function (v: string, dataType: DATA_TYPE): any {
         let res: any = null;
 
         if (v === _undefined || v === null) {
@@ -184,7 +161,7 @@ export const ValueUtils: IValueUtils = {
             case DATA_TYPE.DateTime:
             case DATA_TYPE.Date:
             case DATA_TYPE.Time:
-                res = ValueUtils.valueToDate(v, dtcnv, serverTZ);
+                res = ValueUtils.valueToDate(v);
                 break;
             case DATA_TYPE.Binary:
                 res = JSON.parse(v);
