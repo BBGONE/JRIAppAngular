@@ -8,7 +8,7 @@ import { REFRESH_MODE } from "./const";
 import { DataQuery, TDataQuery } from "./dataquery";
 import { DbContext } from "./dbcontext";
 import { EntityAspect } from "./entity_aspect";
-import { IAssociationInfo, ICalcFieldImpl, IDbSetConstuctorOptions, IDbSetLoadedArgs, IEntityItem, IFieldName, INavFieldImpl, IPermissions, IQueryResponse, IQueryResult, IRowData, IRowInfo, ITrackAssoc } from "./int";
+import { IAssociationInfo, ICalcFieldImpl, IDbSetConstuctorOptions, IDbSetLoadedArgs, IEntityItem, IFieldName, INavFieldImpl, IQueryResponse, IQueryResult, IRowData, IRowInfo, ITrackAssoc } from "./int";
 
 const utils = Utils, { isArray, isNt } = utils.check, { format } = utils.str,
   { getValue, setValue, merge, forEach, Indexer } = utils.core, ERROR = utils.err,
@@ -50,7 +50,6 @@ export interface IInternalDbSetMethods<TItem extends IEntityItem, TObj> extends 
   getNavFieldVal(fieldName: string, item: IEntityItem): any;
   setNavFieldVal(fieldName: string, item: IEntityItem, value: any): void;
   beforeLoad(query: DataQuery<TItem, TObj>, oldQuery: DataQuery<TItem, TObj>): void;
-  updatePermissions(perms: IPermissions): void;
   getChildToParentNames(childFieldName: string): string[];
   fillFromService(info: IFillFromServiceArgs): IQueryResult<TItem>;
   fillFromCache(info: IFillFromCacheArgs): IQueryResult<TItem>;
@@ -143,6 +142,7 @@ export abstract class DbSet<TItem extends IEntityItem = IEntityItem, TObj extend
     });
 
     self._mapAssocFields();
+    self.permissions.canRefreshRow = true;
     const extraInternal = {
       getCalcFieldVal: (fieldName: string, item: TItem) => {
         return self._getCalcFieldVal(fieldName, item);
@@ -155,9 +155,6 @@ export abstract class DbSet<TItem extends IEntityItem = IEntityItem, TObj extend
       },
       beforeLoad: (query: DataQuery<TItem, TObj>, oldQuery: DataQuery<TItem, TObj>) => {
         self._beforeLoad(query, oldQuery);
-      },
-      updatePermissions: (perms: IPermissions) => {
-        self._updatePermissions(perms);
       },
       getChildToParentNames: (childFieldName: string) => {
         return self._getChildToParentNames(childFieldName);

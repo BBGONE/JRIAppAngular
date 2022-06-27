@@ -24,11 +24,8 @@ export class AdwService {
     }
     const self = this, options: IOptions = { service_url: "/RIAppDemoServiceEF" };
     self._uniqueID = utils.core.getNewID();
-    self._dbContext = new DbContext();
-    self._dbContext.initialize({
+    self._dbContext = new DbContext({
       serviceUrl: options.service_url
-    }).then(() => {
-      console.log("adw.service - dbContext initiaized");
     });
 
     this.dbSet.addOnEndEdit(function (_s, args) {

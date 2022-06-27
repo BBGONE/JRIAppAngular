@@ -66,14 +66,6 @@ export interface IRowInfo {
     invalid?: IValidationErrorInfo[];
 }
 
-export interface IPermissions extends ICollPermissions {
-    dbSetName: string;
-}
-
-export interface IPermissionsInfo {
-    permissions: IPermissions[];
-}
-
 export interface IParamInfo {
     parameters: { name: string; value: any; }[];
 }

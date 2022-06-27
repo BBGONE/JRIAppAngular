@@ -1,6 +1,6 @@
 /** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
 import {
-    BaseObject, IAbortablePromise, IBaseObject, IIndexer, IPromise, IStatefulPromise, Lazy, LocaleERRS as ERRS, PromiseState, TErrorHandler, TEventHandler, Utils, WaitQueue
+    BaseObject, IAbortablePromise, IBaseObject, IIndexer, IPromise, IStatefulPromise, Lazy, LocaleERRS as ERRS, TErrorHandler, TEventHandler, Utils, WaitQueue
 } from "../jriapp_shared";
 import { COLL_CHANGE_REASON, DATA_TYPE } from "../jriapp_shared/collection/const";
 import { ValueUtils } from "../jriapp_shared/collection/utils";
@@ -12,7 +12,7 @@ import { DbSets, TDbSetCreatingArgs } from "./dbsets";
 import {
     AccessDeniedError, ConcurrencyError, DataOperationError, SubmitError, SvcValidationError
 } from "./error";
-import { IAssocConstructorOptions, IAssociationInfo, IChangeRequest, IChangeResponse, IEntityItem, IInvokeRequest, IInvokeResponse, IPermissionsInfo, IQueryInfo, IQueryRequest, IQueryResponse, IQueryResult, IRefreshRequest, IRefreshResponse, IRowInfo, ISubset, ITrackAssoc } from "./int";
+import { IAssocConstructorOptions, IAssociationInfo, IChangeRequest, IChangeResponse, IEntityItem, IInvokeRequest, IInvokeResponse, IQueryInfo, IQueryRequest, IQueryResponse, IQueryResult, IRefreshRequest, IRefreshResponse, IRowInfo, ISubset, ITrackAssoc } from "./int";
 
 const utils = Utils, http = utils.http, { isArray, isNt, isFunc, isString } = utils.check,
   { format, endsWith } = utils.str, { merge, Indexer } = utils.core, ERROR = utils.err,
@@ -75,7 +75,6 @@ export type TSubmittedArgs = { context: IIndexer<any> };
 export abstract class DbContext<TDbSets extends DbSets = DbSets, TMethods = any, TAssoc = any> extends BaseObject {
   private _requestHeaders: IIndexer<string>;
   private _requests: IRequestPromise[];
-  private _initState: IStatefulPromise<any>;
   private _dbSets: TDbSets;
   private _svcMethods: TMethods;
   private _assoc: TAssoc;
@@ -87,11 +86,13 @@ export abstract class DbContext<TDbSets extends DbSets = DbSets, TMethods = any,
   private _pendingSubmit: { promise: IPromise; };
   private _waitQueue: WaitQueue;
   private _internal: IInternalDbxtMethods;
+  private 
 
-  constructor() {
+  constructor(options: {
+    serviceUrl: string;
+  }) {
     super();
     const self = this;
-    this._initState = null;
     this._requestHeaders = Indexer();
     this._requests = [];
     this._dbSets = null;
@@ -124,6 +125,7 @@ export abstract class DbContext<TDbSets extends DbSets = DbSets, TMethods = any,
     this.objEvents.onProp("isSubmiting", () => {
       self.objEvents.raiseProp("isBusy");
     });
+    this.initialize(options);
   }
   override dispose(): void {
     if (this.getIsDisposed()) {
@@ -142,8 +144,6 @@ export abstract class DbContext<TDbSets extends DbSets = DbSets, TMethods = any,
     this._dbSets = null;
     this._svcMethods = <TMethods>{};
     this._queryInfo = Indexer();
-    this._serviceUrl = null;
-    this._initState = null;
     this._isSubmiting = false;
     this._isHasChanges = false;
     super.dispose();
@@ -185,14 +185,6 @@ export abstract class DbContext<TDbSets extends DbSets = DbSets, TMethods = any,
         self._initMethod(method);
       }
     }
-  }
-  protected _updatePermissions(info: IPermissionsInfo): void {
-    info.permissions.forEach((perms) => {
-      const dbSet = this.findDbSet(perms.dbSetName);
-      if (!!dbSet) {
-        dbSet._getInternal().updatePermissions(perms);
-      }
-    });
   }
   protected _initAssociation(assoc: IAssociationInfo): void {
     const self = this, options: IAssocConstructorOptions = {
@@ -754,45 +746,17 @@ export abstract class DbContext<TDbSets extends DbSets = DbSets, TMethods = any,
   _getInternal(): IInternalDbxtMethods {
     return this._internal;
   }
-  initialize(options: {
+  protected initialize(options: {
     serviceUrl: string;
-    permissions?: IPermissionsInfo;
-  }): IPromise {
-    if (!!this._initState) {
-      return this._initState;
-    }
-    const self = this, opts = merge(options, {
-      serviceUrl: <string>null,
-      permissions: <IPermissionsInfo>null
+  }): void {
+    const opts = merge(options, {
+      serviceUrl: <string>null
     });
     if (!isString(opts.serviceUrl)) {
       throw new Error(format(ERRS.ERR_PARAM_INVALID, "serviceUrl", opts.serviceUrl));
     }
     this._serviceUrl = opts.serviceUrl;
     this._initDbSets();
-
-    this._initState = delay<IPermissionsInfo>(() => {
-      if (!!opts.permissions) {
-        return opts.permissions;
-      } else {
-        // initialize by obtaining metadata from the data service by ajax call
-        const loadUrl = this._getUrl(DATA_SVC_METH.Permissions);
-        const ajaxPromise = http.getAjax(loadUrl, self.requestHeaders);
-        this._addRequestPromise(ajaxPromise, DATA_OPER.Init);
-        return ajaxPromise.then((permissions: string) => {
-          return <IPermissionsInfo>JSON.parse(permissions);
-        });
-      }
-    }).then((res: IPermissionsInfo) => {
-      self._checkDisposed();
-      self._updatePermissions(res);
-      self.objEvents.raiseProp("isInitialized");
-    }).catch((err) => {
-      self._onDataOperError(err, DATA_OPER.Init);
-      ERROR.throwDummy(err);
-    });
-
-    return this._initState;
   }
   addOnDisposed(handler: TEventHandler<DbContext, any>, nmspace?: string, context?: object): void {
     this.objEvents.addOnDisposed(handler, nmspace, context);
@@ -939,7 +903,7 @@ export abstract class DbContext<TDbSets extends DbSets = DbSets, TMethods = any,
     return this._serviceUrl;
   }
   get isInitialized(): boolean {
-    return !!this._initState && this._initState.state() === PromiseState.Resolved;
+    return !!this._dbSets;
   }
   get isBusy(): boolean {
     return (this.requestCount > 0) || this.isSubmiting;

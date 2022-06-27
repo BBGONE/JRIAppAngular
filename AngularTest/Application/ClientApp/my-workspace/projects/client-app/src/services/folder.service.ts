@@ -38,8 +38,7 @@ export class FolderService {
     }
     const self = this, options: IOptions = { service_url: "/FolderBrowserService" };
 
-    self._dbContext = new FOLDER_DB.DbContext();
-    self._dbContext.initialize({
+    self._dbContext = new FOLDER_DB.DbContext({
       serviceUrl: options.service_url
     });
 

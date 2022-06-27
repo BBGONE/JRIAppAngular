@@ -1,7 +1,7 @@
-﻿/** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
+/** The MIT License (MIT) Copyright(c) 2016-present Maxim V.Tsapov */
 export {
-    IFieldName, IEntityItem, IPermissions, IQueryResult, IDbSetLoadedArgs, IErrorInfo, IMetadata, IDbSetConstuctorOptions,
-    IValidationErrorInfo, IPermissionsInfo, IFilterInfo, ISortInfo, IRowData, IAssociationInfo, IQueryInfo
+    IFieldName, IEntityItem, IQueryResult, IDbSetLoadedArgs, IErrorInfo, IMetadata, IDbSetConstuctorOptions,
+    IValidationErrorInfo, IFilterInfo, ISortInfo, IRowData, IAssociationInfo, IQueryInfo
 } from "./jriapp_db/int";
 export { DbSet, TDbSet, IDbSetConstructor, IInternalDbSetMethods } from "./jriapp_db/dbset";
 export * from "./jriapp_db/dataview";
@@ -16,4 +16,4 @@ export * from "./jriapp_db/error";
 export * from "./jriapp_db/complexprop";
 
 
-export const VERSION = "1.0.0";
+export const VERSION = "1.1.0";

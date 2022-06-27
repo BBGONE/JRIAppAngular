@@ -242,9 +242,6 @@ export abstract class BaseCollection<TItem extends ICollectionItem> extends Base
   protected _setInternal<T extends IInternalCollMethods<TItem>>(internal: T) {
     this._internal = internal;
   }
-  protected _updatePermissions(perms: IPermissions): void {
-    this._perms = perms;
-  }
   protected _getPKFieldInfos(): IFieldInfo[] {
     if (!!this._pkInfo) {
       return this._pkInfo;
